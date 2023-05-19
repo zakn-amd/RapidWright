@@ -65,6 +65,7 @@ import com.xilinx.rapidwright.examples.SLRCrosserGenerator;
 import com.xilinx.rapidwright.examples.StampPlacement;
 import com.xilinx.rapidwright.examples.UpdateRoutingUsingSATRouter;
 import com.xilinx.rapidwright.examples.tilebrowser.PartTileBrowser;
+import com.xilinx.rapidwright.fpgaIFComp.PrepRoutedBenchmark;
 import com.xilinx.rapidwright.interchange.DeviceResourcesExample;
 import com.xilinx.rapidwright.interchange.EnumerateCellBelMapping;
 import com.xilinx.rapidwright.interchange.GenerateInterchangeDevices;
@@ -164,6 +165,7 @@ public class MainEntrypoint {
         addFunction("PipelineGenerator", PipelineGenerator::main);
         addFunction("PipelineGeneratorWithRouting", PipelineGeneratorWithRouting::main);
         addFunction("PolynomialGenerator", PolynomialGenerator::main);
+        addFunction("PrepRoutedBenchmark", PrepRoutedBenchmark::main);
         addFunction("PrintEDIFInstances", PrintEDIFInstances::main);
         addFunction("ProbeRouter", ProbeRouter::main);
         addFunction("PseudoPIPHelper", PseudoPIPHelper::main);
