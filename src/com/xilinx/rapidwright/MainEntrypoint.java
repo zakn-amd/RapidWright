@@ -66,6 +66,7 @@ import com.xilinx.rapidwright.examples.StampPlacement;
 import com.xilinx.rapidwright.examples.UpdateRoutingUsingSATRouter;
 import com.xilinx.rapidwright.examples.tilebrowser.PartTileBrowser;
 import com.xilinx.rapidwright.fpgaIFComp.PrepRoutedBenchmark;
+import com.xilinx.rapidwright.fpgaIFComp.RouteIF;
 import com.xilinx.rapidwright.interchange.DeviceResourcesExample;
 import com.xilinx.rapidwright.interchange.EnumerateCellBelMapping;
 import com.xilinx.rapidwright.interchange.GenerateInterchangeDevices;
@@ -172,6 +173,7 @@ public class MainEntrypoint {
         addFunction("RapidWright", RapidWright::main);
         addFunction("ReportDevicePerformance", ReportDevicePerformance::main);
         addFunction("ReportTimingExample", ReportTimingExample::main);
+        addFunction("RouteIF", RouteIF::main);
         addFunction("Router", Router::main);
         addFunction("RouteThruHelper", RouteThruHelper::main);
         addFunction("RunSATRouterExample", RunSATRouterExample::main);
