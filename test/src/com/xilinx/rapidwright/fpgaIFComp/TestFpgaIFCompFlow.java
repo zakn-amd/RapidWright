@@ -27,7 +27,7 @@ import java.io.IOException;
 import java.io.FileOutputStream;
 import java.nio.file.Path;
 import java.util.List;
-import java.util.Optional;
+import java.util.stream.Stream;
 import java.util.ArrayList;
 
 import com.xilinx.rapidwright.design.ConstraintGroup;
@@ -41,13 +41,14 @@ import com.xilinx.rapidwright.util.LocalJob;
 
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Assumptions;
-import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.MethodSource;
 
 public class TestFpgaIFCompFlow {
     // this should probably be in something like com.xilinx.rapidwright.util
     // generalized/simplified version of com.xilinx.rapidwright.ipi.BlockUpdater.runVivadoTasks
-    private static boolean runVivadoTask(String runDir, String tclScript, boolean verbose) {
+    private static List<String> runVivadoTask(String runDir, String tclScript, boolean verbose) {
         // all this method does is get vivado to run a TCL script
         final String vivadoCmd = "vivado -mode batch -source " + tclScript;
         System.out.println(vivadoCmd);
@@ -57,37 +58,51 @@ public class TestFpgaIFCompFlow {
         j.setCommand(vivadoCmd);
         j.setRunDir(runDir);
         j.launchJob();
-        Optional<List<String>> log = Optional.empty();
-
-        // helper class to print the output of vivado
-        class PrintLog{
-            private static void print(Optional<List<String>> log, boolean verbose) {
-                if(!log.isEmpty() && verbose) {
-                    for(String l : log.get()) {
-                        System.out.println(l);
-                    }
-                }
-            }
-        }
 
         // run the vivado job
         while (!j.isFinished()) {
-            log = j.getLastLogLines();
-            PrintLog.print(log, verbose);
+            if(verbose) {
+                System.out.println("Vivado running");
+            }
             try {
-                Thread.sleep(1000);
+                Thread.sleep(5000);
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
         }
-         log = j.getLastLogLines();
-        PrintLog.print(log, verbose);
+        String logFile = j.getLogFilename();
+        List<String> log = new ArrayList<>();
+        log = FileTools.getLinesFromTextFile(logFile);
+        if(!log.isEmpty() && verbose) {
+            for(String l : log) {
+                System.out.println(l);
+            }
+        }
 
-        return j.jobWasSuccessful();
+        return log;
     }
 
-    @Test
-    public void testFlow(@TempDir Path tempDir) throws IOException {
+    private static int readVivadoLogForKeyPhrase(List<String> log, String key) {
+        for(String l : log) {
+            if(l.contains(key)) {
+                return Integer.parseInt(l.replaceAll("[^\\d]", ""));
+            }
+        }
+        return -1;
+    }
+
+    static Stream<RouteIF> routersToTest(){
+        RouteIF R = new RouteIF();
+        RouteIF rr = R.new rwRouter();
+        //RouteIF cr = R.new classicRouter(); // really slow
+        RouteIF nr = R.new nullRouter();
+        return Stream.of(rr, nr);
+    }
+
+    // TODO: parameterize based on input dcp and expected unrouted/error'd nets
+    @ParameterizedTest
+    @MethodSource("com.xilinx.rapidwright.fpgaIFComp.TestFpgaIFCompFlow#routersToTest")
+    public void testFlow(RouteIF competitionRouter, @TempDir Path tempDir) throws IOException {
         Assumptions.assumeTrue(FileTools.isVivadoOnPath());
 
         final String inputDCP = RapidWrightDCP.getString("picoblaze_partial.dcp");
@@ -102,8 +117,7 @@ public class TestFpgaIFCompFlow {
         String prepArgs[] = {inputDCP, outputIF};
         PrepRoutedBenchmark.main(prepArgs);
 
-        String routeArgs[] = {outputIF+".netlist", outputIF+".phys"};
-        RouteIF.main(routeArgs);
+        competitionRouter.route(outputIF+".netlist", outputIF+".phys");
 
         final String outputDCP = tempDir.resolve("rerouted_picoblaze_partial.dcp").toString();
         String checkArgs[] = {outputIF+"_routed.netlist", outputIF+"_routed.phys", constraintsFile, outputDCP};
@@ -116,8 +130,11 @@ public class TestFpgaIFCompFlow {
         lines.add("exit");
         FileTools.writeLinesToTextFile(lines, tclScript);
 
-        boolean r = runVivadoTask(tempDir.toString(), tclScript, true);
+        List<String> log = runVivadoTask(tempDir.toString(), tclScript, true);
+        int ur = readVivadoLogForKeyPhrase(log, "# of unrouted nets");
+        int re = readVivadoLogForKeyPhrase(log, "# of nets with routing errors");
 
-        Assertions.assertTrue(r);
+        Assertions.assertEquals(0, ur);
+        Assertions.assertEquals(0, re);
     }
 }
