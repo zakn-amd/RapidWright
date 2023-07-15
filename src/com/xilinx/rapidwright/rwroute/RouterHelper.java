@@ -124,7 +124,8 @@ public class RouterHelper {
         Node intNode = output.getConnectedNode();
         int watchdog = 5;
 
-        while (intNode.getAllDownhillNodes().get(0).getTile().getTileTypeEnum() != TileTypeEnum.INT) {
+        List<Node> downhillNodes = intNode.getAllDownhillNodes();
+        while (!downhillNodes.isEmpty() && downhillNodes.get(0).getTile().getTileTypeEnum() != TileTypeEnum.INT) {
             List<Node> downhills = intNode.getAllDownhillNodes();
             intNode = downhills.get(0);
             if (downhills.size() > 1) {
@@ -139,6 +140,7 @@ public class RouterHelper {
                 intNode = null;
                 break;
             }
+            downhillNodes = intNode.getAllDownhillNodes();
         }
         return intNode;
     }
