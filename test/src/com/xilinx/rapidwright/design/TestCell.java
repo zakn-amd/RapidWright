@@ -74,4 +74,11 @@ public class TestCell {
         
         Assertions.assertEquals(pin.getName(), cell.getCorrespondingSitePinName("D"));
     }
+
+    @Test
+    public void testGetPropertyNoEDIFCellInst() {
+        Cell cell = new Cell("cell");
+        Assertions.assertNull(cell.getEDIFCellInst());
+        Assertions.assertNull(cell.getProperty("a_property_that_doesnt_exist"));
+    }
 }
