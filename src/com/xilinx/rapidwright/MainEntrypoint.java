@@ -99,7 +99,9 @@ import com.xilinx.rapidwright.util.MakeBlackBox;
 import com.xilinx.rapidwright.util.PartPrinter;
 import com.xilinx.rapidwright.util.PerformanceExplorer;
 import com.xilinx.rapidwright.util.ReplaceEDIFInDCP;
+import com.xilinx.rapidwright.util.RouteInterchange;
 import com.xilinx.rapidwright.util.StringTools;
+import com.xilinx.rapidwright.util.UnrouteDcp;
 import com.xilinx.rapidwright.util.Unzip;
 import com.xilinx.rapidwright.util.performance_evaluation.PerformanceEvaluation;
 
@@ -180,6 +182,7 @@ public class MainEntrypoint {
         addFunction("ReportDevicePerformance", ReportDevicePerformance::main);
         addFunction("ReportTimingExample", ReportTimingExample::main);
         addFunction("Router", Router::main);
+        addFunction("RouteInterchange", RouteInterchange::main);
         addFunction("RouteThruHelper", RouteThruHelper::main);
         addFunction("RunSATRouterExample", RunSATRouterExample::main);
         addFunction("RWRoute", RWRoute::main);
@@ -189,6 +192,7 @@ public class MainEntrypoint {
         addFunction("StandaloneEntrypoint", StandaloneEntrypoint::main);
         addFunction("StringTools", StringTools::main);
         addFunction("TileColumnPattern", TileColumnPattern::main);
+        addFunction("UnrouteDcp", UnrouteDcp::main);
         addFunction("Unzip", Unzip::main);
         addFunction("UpdateRoutingUsingSATRouter", UpdateRoutingUsingSATRouter::main);
     }
